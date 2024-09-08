@@ -1,18 +1,6 @@
-import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import colors from '../../utils/style/colors'
 import darkLogo from '../../assets/dark-logo.png'
-
-const StyledLink = styled(Link)`
-   padding: 10px 20px;
-   margin: 10px;
-   color: #8186a0;
-   text-decoration: none;
-   font-size: 18px;
-   ${(props) => 
-   props.$isFullLink && 
-   `color: white; border-radius: 30px; background-color: ${colors.primary}; `}
-`
+import { StyledLink } from '../../utils/style/Atoms'
 
 const StyledNav = styled.nav`
    display: flex;

@@ -1,9 +1,10 @@
 import { Link, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import colors from '../../utils/style/colors'
-import { useContext, useEffect, useState } from 'react'
+import { useContext } from 'react'
 import { Loader } from '../../utils/style/Atoms'
 import { SurveyContext } from '../../utils/context'
+import { useFetch } from '../../utils/hooks'
 
 const SurveyContainer = styled.div`
   display: flex;
@@ -60,67 +61,51 @@ function Survey() {
   const questionNumberInt = parseInt(questionNumber)
   const previousNumber = questionNumberInt === 1 ? 1 : questionNumberInt - 1;
 
-  const [questions, setQuestions] = useState({})
-  const [isDataLoading, setDataLoading] = useState(false)
-  const [error, setError] = useState(null)
-
   const { answers, saveAnswers } = useContext(SurveyContext)
 
   function saveReply(answer) {
     saveAnswers({ [questionNumber]: answer })
   }
 
+  // Ensure that the path in the frontend matches the corresponding path in the backend
+  const { data, isLoading, error } = useFetch(`http://localhost:8000/survey`)
+
+  const { surveyData } = data
+
   function LinkToRender() {
-    if (questions[questionNumberInt + 1])
+    if (surveyData && surveyData[questionNumberInt + 1])
       return <Link to={`/survey/${questionNumberInt + 1}`}>Next </Link>
     return <Link to="/results">Results</Link>
   }
 
-  useEffect(() => {
-    async function fetchSurvey() {
-      setDataLoading(true)
-      try {
-        const response = await fetch(`http://localhost:8000/survey`)
-        const { surveyData } = await response.json()
-        setQuestions(surveyData)
-      } catch (error) {
-        console.log(error)
-        setError(error)
-      } finally {
-        setDataLoading(false)
-      }
-    }
-    fetchSurvey()
-  }, [])
-
   return (
     <SurveyContainer>
       <QuestionTitle>Question {questionNumber}</QuestionTitle>
-      {isDataLoading ?
+      {isLoading ?
         <Loader /> :
-        questions[questionNumber] && <QuestionContent>{questions[questionNumber]}</QuestionContent>
+        error ? <span>Something went wrong</span> :
+          surveyData[questionNumber] && <>
+            <QuestionContent>{surveyData && surveyData[questionNumber]}</QuestionContent>
+            <ReplyWrapper>
+              <ReplyBox
+                onClick={() => saveReply(true)}
+                isSelected={answers[questionNumber] === true}
+              >
+                Yes
+              </ReplyBox>
+              <ReplyBox
+                onClick={() => saveReply(false)}
+                isSelected={answers[questionNumber] === false}
+              >
+                No
+              </ReplyBox>
+            </ReplyWrapper>
+            <LinkWrapper>
+              <Link to={`/survey/${previousNumber}`}>Back </Link>
+              <LinkToRender />
+            </LinkWrapper>
+          </>
       }
-      {error && <span>Something went wrong</span>}
-
-      <ReplyWrapper>
-        <ReplyBox
-          onClick={() => saveReply(true)}
-          isSelected={answers[questionNumber] === true}
-        >
-          Yes
-        </ReplyBox>
-        <ReplyBox
-          onClick={() => saveReply(false)}
-          isSelected={answers[questionNumber] === false}
-        >
-          No
-        </ReplyBox>
-      </ReplyWrapper>
-
-      <LinkWrapper>
-        <Link to={`/survey/${previousNumber}`}>Back </Link>
-        <LinkToRender />
-      </LinkWrapper>
     </SurveyContainer>
   )
 }

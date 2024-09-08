@@ -1,9 +1,8 @@
-// import DefaultPicture from '../../assets/profile.png';
 import styled from 'styled-components';
 import Card from '../../components/Card';
 import colors from '../../utils/style/colors';
-import { useEffect, useState } from 'react';
 import { Loader } from '../../utils/style/Atoms';
+import { useFetch, useTheme } from '../../utils/hooks';
 
 const ProfilesWrapper = styled.div`
     display: flex;
@@ -23,7 +22,7 @@ const StyledTitle = styled.h1`
   width: 100%;
   text-align: center;
   line-height: 2;
-  color: #2f2e41;
+  color: ${({ theme }) => (theme === 'light' ? '#000000' : '#ffffff')};
 `
 
 const StyledSubTitle = styled.h3`
@@ -35,39 +34,22 @@ const StyledSubTitle = styled.h3`
 `
 
 function Freelancers() {
-  const [freelancerProfiles, setFreelancerProfiles] = useState([])
-  const [isDataLoading, setDataLoading] = useState(false)
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-
-    async function fetchFreelancers() {
-      setDataLoading(true)
-      try {
-        const response = await fetch(`http://localhost:8000/freelancers`)        
-        const { freelancersList } = await response.json()
-        setFreelancerProfiles(freelancersList)
-      } catch (error) {
-        console.log(error)
-        setError(error)
-      } finally {
-        setDataLoading(false)
-      }
-    }
-    fetchFreelancers()
-  }, [])
+  const { theme } = useTheme()
+  // Ensure that the path in the frontend matches the corresponding path in the backend
+  const { isLoading, data, error } = useFetch('http://localhost:8000/freelancers')
+  const { freelancersList } = data
 
   return (
     <div>
-      <StyledTitle>Find your service provider</StyledTitle>
+      <StyledTitle theme={theme}>Find your service provider</StyledTitle>
       <StyledSubTitle>Here at Shiny we bring together the best profiles for you</StyledSubTitle>
       <ProfilesWrapper>
         <CardsContainer>
           {error && <span>Something went wrong</span>}
-          {isDataLoading ?
+          {isLoading ?
             <Loader />
             :
-            freelancerProfiles.map((freelancer, idx) => (
+            freelancersList.map((freelancer, idx) => (
               <Card
                 key={idx}
                 label={freelancer.job}
