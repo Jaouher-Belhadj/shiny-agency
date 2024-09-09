@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import DefaultPicture from '../../assets/profile.png'
 import styled from 'styled-components'
 import colors from '../../utils/style/colors'
+import { useState } from 'react'
 
 const CardLabel = styled.span`
    color: #5843e4;
@@ -35,11 +36,14 @@ const CardWrapper = styled.div`
 `
 
 function Card({ label = '', title = '', picture = DefaultPicture }) {
+    const [isFavorite, setIsFavorite] = useState(false)
+    const star = isFavorite ? '⭐️' : ''
+
     return (
-        <CardWrapper>
+        <CardWrapper onClick={() => setIsFavorite(!isFavorite)} >
             <CardLabel>{label}</CardLabel>
             <CardImage src={picture} alt="freelancer" />
-            <span>{title}</span>
+            <span>{star} {title} {star}</span>
         </CardWrapper>
     )
 }
