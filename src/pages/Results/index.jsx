@@ -115,6 +115,12 @@ function Results() {
                   <p>{result.description}</p>
                 </JobDescription>
               ))}
+            {resultsData.length === 0 && (
+              <p>
+                There are no results for the selected answers. Please
+                <StyledLink to="/survey/1" style={{ padding: "10px 0" }} >try again</StyledLink>.
+              </p>
+            )}
           </DescriptionWrapper>
         </ResultsContainer>
       )
